@@ -80,18 +80,29 @@ const WaterCorpsChart = () => {
     if (active && payload && payload.length) {
       const isForecast = label.includes('forecast');
       return (
-        <div className="bg-white p-4 border-2 border-gray-300 rounded-lg shadow-lg">
-          <p className="font-bold text-gray-800 mb-2">
+        <div className="bg-white/95 backdrop-blur-sm p-4 border border-gray-200 rounded-xl shadow-2xl">
+          <p className="font-bold text-gray-900 mb-3 text-base border-b border-gray-200 pb-2">
             {label}
-            {isForecast && <span className="text-xs ml-2 text-orange-600">(Projected)</span>}
+            {isForecast && <span className="text-xs ml-2 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Projected</span>}
           </p>
-          {payload
-            .sort((a, b) => b.value - a.value)
-            .map((entry, index) => (
-              <p key={index} style={{ color: entry.color }} className="text-sm">
-                {entry.name}: {entry.value ? `$${entry.value.toFixed(4)}/kWh` : 'N/A'}
-              </p>
-            ))}
+          <div className="space-y-1.5 max-h-48 overflow-y-auto">
+            {payload
+              .sort((a, b) => b.value - a.value)
+              .map((entry, index) => (
+                <div key={index} className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: entry.color }}
+                    />
+                    <span className="text-sm font-medium text-gray-700">{entry.name}</span>
+                  </div>
+                  <span className="text-sm font-bold" style={{ color: entry.color }}>
+                    {entry.value ? `$${entry.value.toFixed(4)}` : 'N/A'}
+                  </span>
+                </div>
+              ))}
+          </div>
         </div>
       );
     }
@@ -99,117 +110,216 @@ const WaterCorpsChart = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
-      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-2xl p-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Water Corporations Cost per kWh ($/kWh)</h1>
-        <p className="text-gray-600 mb-4">Interactive time series visualization (2013-2025)</p>
-
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-gray-700">Select Corporations:</h2>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowForecast(!showForecast)}
-                className={`px-4 py-1.5 text-sm rounded-lg transition-all ${
-                  showForecast
-                    ? 'bg-orange-500 text-white shadow-md'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                {showForecast ? '📊 Forecast ON' : '📈 Show Forecast'}
-              </button>
-              <button
-                onClick={() => setSelectedCorps(corporations)}
-                className="px-3 py-1.5 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-              >
-                Select All
-              </button>
-              <button
-                onClick={() => setSelectedCorps([])}
-                className="px-3 py-1.5 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 transition"
-              >
-                Clear
-              </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header Section */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8 mb-6 border border-gray-100">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+                Victoria Water Corporations
+              </h1>
+              <p className="text-gray-600 text-lg">Electricity Cost Analysis ($/kWh)</p>
+            </div>
+            <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-xl shadow-lg">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              <span className="font-semibold">2013-2025</span>
             </div>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {corporations.map((corp, index) => (
-              <button
-                key={corp}
-                onClick={() => toggleCorporation(corp)}
-                onMouseEnter={() => setHoveredCorp(corp)}
-                onMouseLeave={() => setHoveredCorp(null)}
-                className={`px-2 py-1 text-xs rounded border transition-all ${
-                  selectedCorps.includes(corp)
-                    ? 'border-transparent shadow-sm font-medium'
-                    : 'border-gray-300 hover:border-gray-400 bg-white'
-                } ${hoveredCorp === corp ? 'ring-2 ring-blue-300 transform scale-105' : ''}`}
-                style={{
-                  backgroundColor: selectedCorps.includes(corp) ? colors[index] : 'white',
-                  color: selectedCorps.includes(corp) ? 'white' : colors[index]
-                }}
-                title={corp}
-              >
-                {corp.length > 15 ? corp.substring(0, 13) + '...' : corp}
-              </button>
-            ))}
-          </div>
+          <p className="text-sm text-gray-500">
+            Tracking electricity costs across 18 Victorian water corporations over 12 years
+          </p>
         </div>
 
-        <ResponsiveContainer width="100%" height={500}>
-          <LineChart data={dataWithForecast} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis
-              dataKey="year"
-              tick={{ fill: '#374151', fontSize: 11 }}
-              tickLine={{ stroke: '#9ca3af' }}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis
-              tick={{ fill: '#374151' }}
-              tickLine={{ stroke: '#9ca3af' }}
-              tickFormatter={(value) => `$${value.toFixed(2)}`}
-              label={{ value: '$/kWh', angle: -90, position: 'insideLeft', style: { fill: '#374151', fontWeight: 'bold' } }}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              wrapperStyle={{ paddingTop: '20px' }}
-              iconType="line"
-            />
-            {selectedCorps.map((corp, index) => (
-              <Line
-                key={corp}
-                type="monotone"
-                dataKey={corp}
-                stroke={colors[corporations.indexOf(corp)]}
-                strokeWidth={hoveredCorp === corp ? 4 : 2}
-                strokeDasharray={showForecast ? "0 0 0 0 0 0 0 0 0 0 0 0 5 5" : "0"}
-                dot={(props) => {
-                  const isForecast = props.payload.year?.includes('forecast');
-                  return (
-                    <circle
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={isForecast ? 5 : (hoveredCorp === corp ? 5 : 2)}
-                      fill={isForecast ? '#f97316' : props.stroke}
-                      stroke={isForecast ? '#ea580c' : props.stroke}
-                      strokeWidth={isForecast ? 2 : 0}
-                    />
-                  );
-                }}
-                activeDot={{ r: 6 }}
-                connectNulls={false}
-                opacity={hoveredCorp ? (hoveredCorp === corp ? 1 : 0.3) : 1}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        {/* Main Chart Card */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          {/* Controls Section */}
+          <div className="p-6 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                  Filter Corporations
+                </h2>
+                <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  {selectedCorps.length} selected
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setShowForecast(!showForecast)}
+                  className={`group relative px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
+                    showForecast
+                      ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/50 scale-105'
+                      : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-orange-400 hover:text-orange-600'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    {showForecast ? (
+                      <>
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                        </svg>
+                        Forecast Active
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        Show Forecast
+                      </>
+                    )}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setSelectedCorps(corporations)}
+                  className="px-4 py-2.5 text-sm font-semibold bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  Select All
+                </button>
+                <button
+                  onClick={() => setSelectedCorps([])}
+                  className="px-4 py-2.5 text-sm font-semibold bg-white text-gray-700 border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
 
-        <div className="mt-4 text-xs text-gray-600 space-y-1">
-          <p><strong>💡 Tips:</strong> Click corporation buttons to show/hide. Hover to highlight. Click "Show Forecast" to project 2025-26 values.</p>
-          <p><strong>📈 Forecast:</strong> Uses linear regression on historical data (dashed line with orange dots).</p>
+            {/* Corporation Chips */}
+            <div className="flex flex-wrap gap-2">
+              {corporations.map((corp, index) => (
+                <button
+                  key={corp}
+                  onClick={() => toggleCorporation(corp)}
+                  onMouseEnter={() => setHoveredCorp(corp)}
+                  onMouseLeave={() => setHoveredCorp(null)}
+                  className={`group relative px-3 py-2 text-xs font-medium rounded-lg border-2 transition-all duration-200 ${
+                    selectedCorps.includes(corp)
+                      ? 'shadow-md transform hover:scale-105'
+                      : 'bg-white/70 hover:bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                  } ${hoveredCorp === corp ? 'ring-4 ring-blue-200 ring-opacity-50 transform scale-105 z-10' : ''}`}
+                  style={{
+                    backgroundColor: selectedCorps.includes(corp) ? colors[index] : undefined,
+                    color: selectedCorps.includes(corp) ? 'white' : colors[index],
+                    borderColor: selectedCorps.includes(corp) ? colors[index] : undefined
+                  }}
+                  title={corp}
+                >
+                  <span className="flex items-center gap-1.5">
+                    {selectedCorps.includes(corp) && (
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                    {corp.length > 15 ? corp.substring(0, 13) + '...' : corp}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Chart Section */}
+          <div className="p-6 bg-white">
+            <ResponsiveContainer width="100%" height={550}>
+              <LineChart data={dataWithForecast} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="gridGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#e5e7eb" stopOpacity="0.8"/>
+                    <stop offset="100%" stopColor="#e5e7eb" stopOpacity="0.2"/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="url(#gridGradient)" />
+                <XAxis
+                  dataKey="year"
+                  tick={{ fill: '#4b5563', fontSize: 11, fontWeight: 500 }}
+                  tickLine={{ stroke: '#9ca3af' }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={90}
+                  stroke="#d1d5db"
+                />
+                <YAxis
+                  tick={{ fill: '#4b5563', fontSize: 12, fontWeight: 500 }}
+                  tickLine={{ stroke: '#9ca3af' }}
+                  tickFormatter={(value) => `$${value.toFixed(2)}`}
+                  label={{
+                    value: 'Cost ($/kWh)',
+                    angle: -90,
+                    position: 'insideLeft',
+                    style: { fill: '#374151', fontWeight: 'bold', fontSize: 14 }
+                  }}
+                  stroke="#d1d5db"
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }} />
+                <Legend
+                  wrapperStyle={{ paddingTop: '30px' }}
+                  iconType="line"
+                />
+                {selectedCorps.map((corp, index) => (
+                  <Line
+                    key={corp}
+                    type="monotone"
+                    dataKey={corp}
+                    stroke={colors[corporations.indexOf(corp)]}
+                    strokeWidth={hoveredCorp === corp ? 4 : 2.5}
+                    strokeDasharray={showForecast ? "0 0 0 0 0 0 0 0 0 0 0 0 5 5" : "0"}
+                    dot={(props) => {
+                      const isForecast = props.payload.year?.includes('forecast');
+                      return (
+                        <circle
+                          cx={props.cx}
+                          cy={props.cy}
+                          r={isForecast ? 6 : (hoveredCorp === corp ? 6 : 3)}
+                          fill={isForecast ? '#f97316' : props.stroke}
+                          stroke={isForecast ? '#ea580c' : 'white'}
+                          strokeWidth={isForecast ? 2 : 2}
+                          className="transition-all duration-200"
+                        />
+                      );
+                    }}
+                    activeDot={{ r: 7, strokeWidth: 3, stroke: 'white' }}
+                    connectNulls={false}
+                    opacity={hoveredCorp ? (hoveredCorp === corp ? 1 : 0.2) : 1}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Info Footer */}
+          <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="flex items-start gap-3 bg-white/60 p-4 rounded-xl">
+                <div className="bg-blue-500 text-white p-2 rounded-lg">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 mb-1">How to Use</p>
+                  <p className="text-gray-600 text-xs leading-relaxed">
+                    Click corporation chips to toggle visibility. Hover over chips to highlight specific trend lines on the chart. Enable forecast mode to view projected 2025-26 values.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 bg-white/60 p-4 rounded-xl">
+                <div className="bg-orange-500 text-white p-2 rounded-lg">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900 mb-1">Forecast Methodology</p>
+                  <p className="text-gray-600 text-xs leading-relaxed">
+                    Linear regression analysis on historical data (minimum 3 points). Projections shown as dashed lines with orange markers.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
