@@ -74,6 +74,30 @@ const formatMillions = (value) =>
 const formatGigawattHours = (value) =>
   value === null || value === undefined ? '—' : `${(value / 1_000_000).toFixed(1)} GWh`;
 
+const metricOptions = [
+  {
+    id: 'ratio',
+    label: 'Cents per kWh',
+    valueKey: 'ratio',
+    formatter: (value) => (value === null ? '—' : `${(value * 100).toFixed(1)}¢/kWh`),
+    axisFormatter: (value) => `${(value * 100).toFixed(0)}¢`,
+  },
+  {
+    id: 'spend',
+    label: 'Total Dollar Spend',
+    valueKey: 'spend',
+    formatter: formatMillions,
+    axisFormatter: (value) => `A$${(value / 1_000_000).toFixed(0)}M`,
+  },
+  {
+    id: 'kWh',
+    label: 'Total kWh',
+    valueKey: 'kWh',
+    formatter: formatGigawattHours,
+    axisFormatter: (value) => `${(value / 1_000_000).toFixed(0)}GWh`,
+  },
+];
+
 const WaterCorpsChart = () => {
   const records = useMemo(() => parseCsvRecords(csvRaw), []);
 
@@ -116,6 +140,12 @@ const WaterCorpsChart = () => {
 
   const [selectedUtilities, setSelectedUtilities] = useState(defaultSelection);
   const [searchTerm, setSearchTerm] = useState('');
+  const [metric, setMetric] = useState('ratio');
+
+  const currentMetric = useMemo(
+    () => metricOptions.find((option) => option.id === metric) ?? metricOptions[0],
+    [metric],
+  );
 
   const aggregatedByYear = useMemo(() => {
     return years.map((year) => {
@@ -138,11 +168,15 @@ const WaterCorpsChart = () => {
       const entry = { year };
       selectedUtilities.forEach((utility) => {
         const match = records.find((record) => record.year === year && record.utility === utility);
-        entry[utility] = match?.ratio ?? null;
+        if (!match) {
+          entry[utility] = null;
+          return;
+        }
+        entry[utility] = metric === 'ratio' ? match.ratio : metric === 'spend' ? match.spend : match.kWh;
       });
       return entry;
     });
-  }, [records, years, selectedUtilities]);
+  }, [records, years, selectedUtilities, metric]);
 
   const latestYear = useMemo(() => {
     return [...years].reverse().find((year) =>
@@ -210,9 +244,13 @@ const WaterCorpsChart = () => {
                     />
                     <span className="font-medium">{item.dataKey}</span>
                   </div>
-                  <div className="text-right text-xs text-slate-300">
-                    <p className="text-sm font-semibold text-white">{formatRatio(item.value)}</p>
+                  <div className="text-right text-xs text-slate-300 space-y-1">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{currentMetric.formatter(item.value)}</p>
+                      <p>{currentMetric.label}</p>
+                    </div>
                     <p>
+                      {record.ratio ? `${(record.ratio * 100).toFixed(1)}¢/kWh` : '—'} ·{' '}
                       {record.spend ? formatMillions(record.spend) : '—'} ·{' '}
                       {record.kWh ? formatGigawattHours(record.kWh) : '—'}
                     </p>
@@ -300,6 +338,21 @@ const WaterCorpsChart = () => {
                 </button>
               </div>
             </div>
+            <div className="flex flex-wrap gap-2">
+              {metricOptions.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => setMetric(option.id)}
+                  className={`px-4 py-2 text-xs font-semibold rounded-xl border transition-colors ${
+                    metric === option.id
+                      ? 'bg-white text-slate-900 border-white shadow-lg shadow-white/30'
+                      : 'text-slate-300 border-white/20 hover:border-white/40'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -325,7 +378,7 @@ const WaterCorpsChart = () => {
                 <XAxis dataKey="year" stroke="#94a3b8" tick={{ fill: '#94a3b8', fontSize: 12 }} />
                 <YAxis
                   stroke="#94a3b8"
-                  tickFormatter={(value) => `${(value * 100).toFixed(0)}¢`}
+                  tickFormatter={(value) => (value == null ? '' : currentMetric.axisFormatter(value))}
                   tick={{ fill: '#94a3b8', fontSize: 12 }}
                 />
                 <Tooltip content={renderTooltip} />
