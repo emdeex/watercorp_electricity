@@ -26,9 +26,9 @@ const WaterCorpsChart = () => {
   ];
 
   const colors = [
-    '#7dd3fc', '#a5b4fc', '#f9a8d4', '#fcd34d', '#fb7185', '#34d399', '#60a5fa',
-    '#f472b6', '#c4b5fd', '#f97316', '#2dd4bf', '#fde047', '#f87171', '#22d3ee',
-    '#bef264', '#fbbf24', '#38bdf8', '#d8b4fe'
+    '#2563eb', '#ea580c', '#16a34a', '#9333ea', '#0891b2', '#f97316', '#ec4899',
+    '#14b8a6', '#f59e0b', '#6366f1', '#0ea5e9', '#ef4444', '#84cc16', '#d946ef',
+    '#64748b', '#22d3ee', '#fb7185', '#a855f7'
   ];
 
   const quickSets = [
@@ -180,23 +180,23 @@ const WaterCorpsChart = () => {
     if (!(active && payload && payload.length)) return null;
     const isForecast = label.includes('forecast');
     return (
-      <div className="bg-slate-900/90 text-slate-100 border border-white/10 rounded-2xl p-4 shadow-xl backdrop-blur">
-        <p className="text-xs uppercase tracking-[0.35em] text-slate-400">
+      <div className="rounded-2xl border border-slate-100 bg-white/95 p-4 shadow-xl">
+        <p className="text-xs font-medium uppercase tracking-[0.3em] text-slate-400">
           {isForecast ? 'Projected' : 'Actual'} · {label}
         </p>
-        <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1 text-sm">
+        <div className="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 text-sm">
           {[...payload]
             .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
             .map((entry, index) => (
               <div key={`${entry.name}-${index}`} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
-                    className="w-2.5 h-2.5 rounded-full"
+                    className="h-2.5 w-2.5 rounded-full"
                     style={{ backgroundColor: entry.color }}
                   />
-                  <span className="text-slate-200">{entry.name}</span>
+                  <span className="text-slate-600">{entry.name}</span>
                 </div>
-                <span className="font-semibold" style={{ color: entry.color }}>
+                <span className="font-semibold text-slate-900" style={{ color: entry.color }}>
                   {entry.value ? `$${entry.value.toFixed(3)}` : 'N/A'}
                 </span>
               </div>
@@ -207,17 +207,17 @@ const WaterCorpsChart = () => {
   };
 
   const StatCard = ({ label, value, helper, tone = 'neutral' }) => (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-      <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{label}</p>
-      <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
+    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">{label}</p>
+      <p className="mt-3 text-2xl font-semibold text-slate-900">{value}</p>
       {helper && (
         <p
-          className={`mt-1 text-xs ${
+          className={`mt-1 text-xs font-medium ${
             tone === 'up'
-              ? 'text-emerald-300'
+              ? 'text-emerald-600'
               : tone === 'down'
-              ? 'text-rose-300'
-              : 'text-slate-400'
+              ? 'text-rose-600'
+              : 'text-slate-500'
           }`}
         >
           {helper}
@@ -227,42 +227,39 @@ const WaterCorpsChart = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 -right-16 h-[420px] w-[420px] rounded-full bg-cyan-500/20 blur-[140px]" />
-        <div className="absolute bottom-0 left-[-120px] h-[360px] w-[360px] rounded-full bg-indigo-500/20 blur-[140px]" />
-      </div>
-
-      <div className="relative mx-auto max-w-7xl px-4 py-10 space-y-8">
-        <header className="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-[0_20px_70px_rgba(2,6,23,0.65)] space-y-6">
+    <div className="min-h-screen bg-slate-50 py-10 text-slate-900">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4">
+        <header className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.6em] text-cyan-200">
-                Energy Dashboard
+              <p className="text-xs font-semibold uppercase tracking-[0.5em] text-indigo-500">
+                Electricity Insights
               </p>
-              <h1 className="mt-3 text-4xl font-semibold text-white">
-                Victoria Water Energy Spend
+              <h1 className="mt-3 text-4xl font-semibold text-slate-900">
+                Victoria Water Corporations
               </h1>
-              <p className="mt-2 text-base text-slate-300">
-                Electricity costs ($/kWh) across 18 corporations from FY2013-14 with a FY2025-26 projection.
+              <p className="mt-2 text-base text-slate-500">
+                Actual costs from FY{rawData[0].year} to FY{rawData[rawData.length - 1].year} with a simple FY2025-26 projection.
               </p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <span className="rounded-2xl border border-cyan-400/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100">
-                {rawData[0].year} — {rawData[rawData.length - 1].year}
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">
+                {rawData[0].year} – {rawData[rawData.length - 1].year}
               </span>
-              <span
-                className={`rounded-2xl border px-4 py-2 text-sm font-semibold ${
+              <button
+                onClick={() => setShowForecast((prev) => !prev)}
+                className={`rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
                   showForecast
-                    ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-100'
-                    : 'border-slate-500/40 bg-slate-600/10 text-slate-200'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                    : 'border-slate-200 bg-white text-slate-600'
                 }`}
               >
-                {showForecast ? 'Forecast Enabled' : 'Actuals Only'}
-              </span>
+                {showForecast ? 'Forecast shown' : 'Actuals only'}
+              </button>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+
+          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
             <StatCard
               label="Avg Cost (latest)"
               value={formatValue(metrics.avgLatest)}
@@ -287,19 +284,17 @@ const WaterCorpsChart = () => {
           </div>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[320px_auto]">
-          <aside className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-6">
+        <section className="grid gap-6 lg:grid-cols-[300px,1fr]">
+          <aside className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Selection</p>
-                <h2 className="mt-1 text-2xl font-semibold text-white">
-                  {selectedCorps.length} corporations
-                </h2>
-                <p className="text-sm text-slate-400">{selectionCoverage}% coverage of Victoria</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">Selection</p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{selectedCorps.length} corporations</h2>
+                <p className="text-sm text-slate-500">{selectionCoverage}% of statewide grid</p>
               </div>
               <button
                 onClick={() => setSelectedCorps(defaultSelection)}
-                className="rounded-full border border-white/20 px-3 py-1 text-xs font-semibold text-slate-200 hover:border-white/60"
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-500 hover:border-slate-300"
               >
                 Reset
               </button>
@@ -307,60 +302,50 @@ const WaterCorpsChart = () => {
 
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setShowForecast((prev) => !prev)}
-                className={`flex-1 rounded-2xl border px-4 py-2 text-sm font-semibold transition ${
-                  showForecast
-                    ? 'border-orange-400/60 bg-orange-500/20 text-orange-100 shadow-md'
-                    : 'border-slate-500/60 bg-slate-700/20 text-slate-200'
-                }`}
-              >
-                {showForecast ? 'Hide Forecast' : 'Show Forecast'}
-              </button>
-              <button
                 onClick={() => setSelectedCorps(corporations)}
-                className="rounded-2xl border border-cyan-400/40 bg-cyan-500/10 px-4 py-2 text-sm font-semibold text-cyan-100 hover:border-cyan-300/70"
+                className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-slate-300"
               >
                 Select All
               </button>
               <button
                 onClick={() => setSelectedCorps([])}
-                className="rounded-2xl border border-white/15 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-white/40"
+                className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:border-slate-300"
               >
                 Clear
               </button>
             </div>
 
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Quick sets</p>
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Quick sets</p>
               <div className="space-y-2">
                 {quickSets.map((set) => (
                   <button
                     key={set.label}
                     onClick={() => applyQuickSet(set.corps)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-left transition hover:border-white/40"
+                    className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-3 text-left transition hover:-translate-y-0.5 hover:shadow-sm"
                   >
-                    <div className="flex items-center justify-between text-sm font-semibold text-white">
+                    <div className="flex items-center justify-between text-sm font-semibold text-slate-800">
                       <span>{set.label}</span>
                       <span className="text-xs text-slate-400">{set.corps.length} corps</span>
                     </div>
-                    <p className="mt-1 text-xs text-slate-400">{set.description}</p>
+                    <p className="mt-1 text-xs text-slate-500">{set.description}</p>
                   </button>
                 ))}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs uppercase tracking-[0.35em] text-slate-400">Search</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Search</label>
               <div className="relative">
                 <input
                   type="search"
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Find a corporation"
-                  className="w-full rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-cyan-400 focus:outline-none"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none"
                 />
                 <svg
-                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                  className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -382,21 +367,19 @@ const WaterCorpsChart = () => {
                     onMouseLeave={() => setHoveredCorp(null)}
                     className={`w-full rounded-2xl border px-4 py-2 text-left text-sm transition ${
                       isActive
-                        ? 'border-white/40 bg-white/10 text-white shadow-lg'
-                        : 'border-white/5 bg-slate-900/30 text-slate-200 hover:border-white/25'
-                    } ${hoveredCorp === corp ? 'ring-2 ring-cyan-300/60' : ''}`}
-                    style={{
-                      borderColor: isActive ? color : undefined,
-                      color: isActive ? 'white' : undefined
-                    }}
+                        ? 'border-slate-200 bg-white shadow-sm'
+                        : 'border-transparent bg-transparent hover:border-slate-200 hover:bg-white'
+                    } ${hoveredCorp === corp ? 'ring-2 ring-indigo-100' : ''}`}
                   >
                     <span className="flex items-center justify-between">
-                      <span>{corp}</span>
-                      {isActive && (
-                        <span className="text-xs font-semibold" style={{ color }}>
-                          Active
-                        </span>
-                      )}
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: color }}
+                        />
+                        {corp}
+                      </span>
+                      {isActive && <span className="text-xs font-semibold text-slate-500">Active</span>}
                     </span>
                   </button>
                 );
@@ -404,17 +387,17 @@ const WaterCorpsChart = () => {
             </div>
           </aside>
 
-          <section className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-6">
+          <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm space-y-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Trend explorer</p>
-                <h2 className="text-2xl font-semibold text-white">Cost per kWh</h2>
-                <p className="text-sm text-slate-400">{forecastableCount} corporations support projections</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Trend explorer</p>
+                <h2 className="text-2xl font-semibold text-slate-900">Cost per kWh</h2>
+                <p className="text-sm text-slate-500">{forecastableCount} corporations have enough history for forecasting.</p>
               </div>
               <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Highlight</p>
-                <p className="text-lg font-semibold text-white">{highlightCorp}</p>
-                <p className="text-sm text-slate-400">{formatValue(highlightValue)} (latest actual)</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Highlight</p>
+                <p className="text-lg font-semibold text-slate-900">{highlightCorp}</p>
+                <p className="text-sm text-slate-500">{formatValue(highlightValue)} latest actual</p>
               </div>
             </div>
 
@@ -422,29 +405,29 @@ const WaterCorpsChart = () => {
               <div className="h-[520px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={dataWithForecast} margin={{ top: 20, right: 40, left: 10, bottom: 50 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,23,42,0.08)" />
                     <XAxis
                       dataKey="year"
-                      tick={{ fill: '#cbd5f5', fontSize: 11 }}
-                      tickLine={{ stroke: 'rgba(255,255,255,0.12)' }}
-                      axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
-                      angle={-35}
+                      tick={{ fill: '#475569', fontSize: 11 }}
+                      tickLine={{ stroke: 'rgba(148,163,184,0.5)' }}
+                      axisLine={{ stroke: 'rgba(148,163,184,0.5)' }}
+                      angle={-30}
                       textAnchor="end"
-                      height={80}
+                      height={70}
                     />
                     <YAxis
-                      tick={{ fill: '#cbd5f5', fontSize: 12, fontWeight: 500 }}
+                      tick={{ fill: '#475569', fontSize: 12, fontWeight: 500 }}
                       tickFormatter={(value) => `$${value.toFixed(2)}`}
-                      tickLine={{ stroke: 'rgba(255,255,255,0.12)' }}
-                      axisLine={{ stroke: 'rgba(255,255,255,0.12)' }}
+                      tickLine={{ stroke: 'rgba(148,163,184,0.5)' }}
+                      axisLine={{ stroke: 'rgba(148,163,184,0.5)' }}
                       label={{
                         value: 'Cost ($/kWh)',
                         angle: -90,
                         position: 'insideLeft',
-                        style: { fill: '#cbd5f5', fontSize: 12, fontWeight: 600 }
+                        style: { fill: '#475569', fontSize: 12, fontWeight: 600 }
                       }}
                     />
-                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#f97316', strokeWidth: 2, strokeDasharray: '5 5' }} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#94a3b8', strokeWidth: 2, strokeDasharray: '5 5' }} />
                     {selectedCorps.map((corp) => {
                       const paletteIndex = corporations.indexOf(corp) % colors.length;
                       const stroke = colors[paletteIndex];
@@ -454,7 +437,7 @@ const WaterCorpsChart = () => {
                           type="monotone"
                           dataKey={corp}
                           stroke={stroke}
-                          strokeWidth={hoveredCorp === corp ? 4 : 2.4}
+                          strokeWidth={hoveredCorp === corp ? 4 : 2.2}
                           strokeOpacity={hoveredCorp ? (hoveredCorp === corp ? 1 : 0.25) : 0.95}
                           dot={(props) => {
                             const isForecast = props.payload.year?.includes('forecast');
@@ -462,14 +445,14 @@ const WaterCorpsChart = () => {
                               <circle
                                 cx={props.cx}
                                 cy={props.cy}
-                                r={isForecast ? 5.5 : hoveredCorp === corp ? 5 : 3}
+                                r={isForecast ? 5 : hoveredCorp === corp ? 4.5 : 3}
                                 fill={isForecast ? '#f97316' : stroke}
-                                stroke={isForecast ? '#fb923c' : '#0f172a'}
+                                stroke={isForecast ? '#fb923c' : '#ffffff'}
                                 strokeWidth={isForecast ? 2 : 1.5}
                               />
                             );
                           }}
-                          activeDot={{ r: 7, strokeWidth: 3, stroke: '#0f172a' }}
+                          activeDot={{ r: 6, strokeWidth: 2, stroke: '#ffffff' }}
                           connectNulls={false}
                         />
                       );
@@ -478,9 +461,9 @@ const WaterCorpsChart = () => {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="flex h-[520px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 text-center text-slate-400">
-                <p className="text-lg font-semibold text-white">Select a corporation</p>
-                <p className="text-sm">Use the chips on the left to add series back into the chart.</p>
+              <div className="flex h-[520px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 text-center text-slate-500">
+                <p className="text-lg font-semibold text-slate-600">Select a corporation</p>
+                <p className="text-sm">Use the panel on the left to add series back into the chart.</p>
               </div>
             )}
 
@@ -489,7 +472,7 @@ const WaterCorpsChart = () => {
                 {selectedCorps.map((corp) => (
                   <span
                     key={`${corp}-legend`}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-slate-100"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600"
                   >
                     <span
                       className="h-2 w-2 rounded-full"
@@ -502,24 +485,24 @@ const WaterCorpsChart = () => {
             )}
 
             <div className="grid gap-3 text-sm md:grid-cols-3">
-              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Highest latest</p>
-                <p className="mt-1 text-lg font-semibold text-white">{metrics.highest.corp}</p>
-                <p className="text-slate-300">{formatValue(metrics.highest.value)}</p>
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Highest latest</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">{metrics.highest.corp}</p>
+                <p className="text-slate-500">{formatValue(metrics.highest.value)}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Most affordable</p>
-                <p className="mt-1 text-lg font-semibold text-white">{metrics.lowest.corp}</p>
-                <p className="text-slate-300">{formatValue(metrics.lowest.value)}</p>
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Most affordable</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">{metrics.lowest.corp}</p>
+                <p className="text-slate-500">{formatValue(metrics.lowest.value)}</p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4">
-                <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Forecast readiness</p>
-                <p className="mt-1 text-lg font-semibold text-white">{forecastableCount} / {corporations.length}</p>
-                <p className="text-slate-300">Corps with ≥3 historic points</p>
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Forecast ready</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">{forecastableCount} / {corporations.length}</p>
+                <p className="text-slate-500">Corps with ≥3 historical points</p>
               </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );
