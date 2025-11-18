@@ -281,8 +281,6 @@ const WaterCorpsChart = () => {
     );
   };
 
-  const resetSelection = () => setSelectedUtilities(defaultSelection);
-
   const renderTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
 
@@ -412,10 +410,10 @@ const WaterCorpsChart = () => {
                   Select all
                 </button>
                 <button
-                  onClick={resetSelection}
+                  onClick={() => setSelectedUtilities([])}
                   className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-sm font-semibold text-slate-200 hover:bg-white/20 transition"
                 >
-                  Reset
+                  Clear all
                 </button>
               </div>
             </div>
