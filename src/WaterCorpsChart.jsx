@@ -67,8 +67,11 @@ const parseCsvRecords = (raw) => {
       headers.forEach((header, index) => {
         record[header] = columns[index] ?? '';
       });
+      const utilityName = record.Utility_Name;
+      if (!utilityName || utilityName.trim().toUpperCase() === 'TOTAL') return null;
+
       return {
-        utility: record.Utility_Name,
+        utility: utilityName,
         year: record.Year,
         kWh: parseNumber(record.kWh),
         spend: parseNumber(record.Value),
