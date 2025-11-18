@@ -82,6 +82,26 @@ The application includes historical cost data ($/kWh) for:
 - Westernport Water
 - Yarra Valley Water
 
+## Moving the CSV into Vercel Postgres
+
+1. **Provision a managed Postgres instance via the Vercel Marketplace**  
+   In your Vercel project dashboard, open the **Storage** tab, choose a Postgres provider (Neon, Prisma Postgres, Supabase, etc.), and connect it to this project. Vercel automatically injects the `POSTGRES_URL`/`DATABASE_URL` secrets into every deployment once the integration is linked.
+
+2. **Pull the connection string locally for development/CLI usage**  
+   Run `vercel env pull .env.local` (or `.env.development.local`) so the `POSTGRES_URL` value is also available when you execute scripts from your machine. The `@vercel/postgres` client will throw `missing_connection_string` unless this variable is present.
+
+3. **Seed the database from the CSV**  
+   - The canonical CSV lives at `data/water_costs.csv`.  
+   - Import it with `npm run seed:water` (or pass a different file path: `npm run seed:water -- ./path/to/file.csv`).  
+   - The script creates a `water_costs` table, upserts every `(year_label, corporation, cost)` row, and can be re-run safely whenever the CSV changes.
+
+4. **Verify and deploy**  
+   - Locally, run `npm run dev` and confirm `/api/water-costs` returns JSON coming from Postgres (watch the badge in the hero section for the “Live data served from Vercel Postgres” status).  
+   - Commit/push, then trigger a Vercel deployment; the same environment variable is already available in the hosted function, so no extra configuration is required.  
+   - If you rotate credentials later, update them in the Vercel dashboard and re-run `vercel env pull` so your local `.env` stays in sync.
+
+> **Tip:** Because Vercel Postgres now routes through its Storage Marketplace integrations, you can swap providers without touching the code—only the injected `POSTGRES_URL` changes.
+
 ## Forecast Methodology
 
 The forecast feature uses simple linear regression on historical data points:
