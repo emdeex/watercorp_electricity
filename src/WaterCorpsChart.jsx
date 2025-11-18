@@ -40,13 +40,13 @@ const WaterCorpsChart = () => {
         }
         const payload = await response.json();
         if (!payload?.data?.length) {
-          throw new Error('No rows returned from database');
+          throw new Error('No rows returned from data source');
         }
 
         if (!cancelled) {
           setRawData(payload.data);
-          setDataSource('vercel-postgres');
-          setLoadError(null);
+          setDataSource(payload.source || 'vercel-postgres');
+          setLoadError(payload.error || null);
         }
       } catch (error) {
         if (!cancelled) {
