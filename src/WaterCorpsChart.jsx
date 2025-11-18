@@ -77,6 +77,15 @@ const formatGigawattHours = (value) =>
 const WaterCorpsChart = () => {
   const records = useMemo(() => parseCsvRecords(csvRaw), []);
 
+  const recordLookup = useMemo(() => {
+    const map = {};
+    records.forEach((record) => {
+      if (!record.utility || !record.year) return;
+      map[`${record.utility}__${record.year}`] = record;
+    });
+    return map;
+  }, [records]);
+
   const utilities = useMemo(
     () => Array.from(new Set(records.map((record) => record.utility))).filter(Boolean),
     [records],
@@ -178,6 +187,43 @@ const WaterCorpsChart = () => {
   };
 
   const resetSelection = () => setSelectedUtilities(defaultSelection);
+
+  const renderTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+
+    return (
+      <div className="rounded-2xl border border-white/10 bg-slate-950/90 px-4 py-3 text-sm text-slate-100 shadow-2xl">
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{label}</p>
+        <div className="mt-2 space-y-2">
+          {payload
+            .filter((item) => item.value !== null)
+            .map((item) => {
+              const record = recordLookup[`${item.dataKey}__${label}`];
+              if (!record) return null;
+
+              return (
+                <div key={item.dataKey} className="flex items-start justify-between gap-6">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-flex h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: item.color || '#fff' }}
+                    />
+                    <span className="font-medium">{item.dataKey}</span>
+                  </div>
+                  <div className="text-right text-xs text-slate-300">
+                    <p className="text-sm font-semibold text-white">{formatRatio(item.value)}</p>
+                    <p>
+                      {record.spend ? formatMillions(record.spend) : '—'} ·{' '}
+                      {record.kWh ? formatGigawattHours(record.kWh) : '—'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 py-10 px-4">
@@ -282,10 +328,7 @@ const WaterCorpsChart = () => {
                   tickFormatter={(value) => `${(value * 100).toFixed(0)}¢`}
                   tick={{ fill: '#94a3b8', fontSize: 12 }}
                 />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#020617', border: '1px solid rgba(255,255,255,0.1)' }}
-                  formatter={(value) => formatRatio(value)}
-                />
+                <Tooltip content={renderTooltip} />
                 <Legend wrapperStyle={{ color: '#cbd5f5' }} />
                 {selectedUtilities.map((utility, index) => (
                   <Line
