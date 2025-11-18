@@ -30,6 +30,25 @@ const palette = [
   '#eab308',
 ];
 
+const CPI_SERIES_NAME = 'CPI Benchmark';
+
+const quarterlyCpiSeries = [
+  { year: 2012, mar: 99.9, jun: 100.4, sep: 101.8, dec: 102.0 },
+  { year: 2013, mar: 102.4, jun: 102.8, sep: 104.0, dec: 104.8 },
+  { year: 2014, mar: 105.4, jun: 105.9, sep: 106.4, dec: 106.6 },
+  { year: 2015, mar: 106.8, jun: 107.5, sep: 108.0, dec: 108.4 },
+  { year: 2016, mar: 108.2, jun: 108.6, sep: 109.4, dec: 110.0 },
+  { year: 2017, mar: 110.5, jun: 110.7, sep: 111.4, dec: 112.1 },
+  { year: 2018, mar: 112.6, jun: 113.0, sep: 113.5, dec: 114.1 },
+  { year: 2019, mar: 114.1, jun: 114.8, sep: 115.4, dec: 116.2 },
+  { year: 2020, mar: 116.6, jun: 114.4, sep: 116.2, dec: 117.2 },
+  { year: 2021, mar: 117.9, jun: 118.8, sep: 119.7, dec: 121.3 },
+  { year: 2022, mar: 123.9, jun: 126.1, sep: 128.4, dec: 130.8 },
+  { year: 2023, mar: 132.6, jun: 133.7, sep: 135.3, dec: 136.1 },
+  { year: 2024, mar: 137.4, jun: 138.8, sep: 139.1, dec: 139.4 },
+  { year: 2025, mar: 140.7, jun: 141.7, sep: 143.6, dec: null },
+];
+
 const parseNumber = (value) => {
   if (value === undefined || value === null || value === '') return null;
   const num = Number(value);
@@ -163,7 +182,43 @@ const WaterCorpsChart = () => {
     });
   }, [records, years]);
 
+  const cpiFinancialYearSeries = useMemo(() => {
+    return years
+      .map((label) => {
+        const [startYearStr] = label.split('-');
+        const startYear = parseInt(startYearStr, 10);
+        if (Number.isNaN(startYear)) return null;
+        const endYear = startYear + 1;
+        const startData = quarterlyCpiSeries.find((entry) => entry.year === startYear);
+        const endData = quarterlyCpiSeries.find((entry) => entry.year === endYear);
+        if (!startData || !endData || !startData.sep || !startData.dec || !endData.mar || !endData.jun) {
+          return null;
+        }
+        const avgIndex = (startData.sep + startData.dec + endData.mar + endData.jun) / 4;
+        return {
+          year: label,
+          avgIndex,
+        };
+      })
+      .filter(Boolean);
+  }, [years]);
+
+  const cpiBenchmarkSeries = useMemo(() => {
+    const baseYear = '2013-14';
+    const baseRatio = aggregatedByYear.find((entry) => entry.year === baseYear)?.avgRatio;
+    const baseIndex = cpiFinancialYearSeries.find((entry) => entry.year === baseYear)?.avgIndex;
+    if (!baseRatio || !baseIndex) return [];
+    return cpiFinancialYearSeries.map((entry) => ({
+      year: entry.year,
+      value: (entry.avgIndex / baseIndex) * baseRatio,
+    }));
+  }, [aggregatedByYear, cpiFinancialYearSeries]);
+
   const lineChartData = useMemo(() => {
+    const cpiLookup = Object.fromEntries(
+      cpiBenchmarkSeries.map((entry) => [entry.year, entry.value]),
+    );
+
     return years.map((year) => {
       const entry = { year };
       selectedUtilities.forEach((utility) => {
@@ -174,9 +229,12 @@ const WaterCorpsChart = () => {
         }
         entry[utility] = metric === 'ratio' ? match.ratio : metric === 'spend' ? match.spend : match.kWh;
       });
+      if (metric === 'ratio' && cpiLookup[year] !== undefined) {
+        entry['CPI Benchmark'] = cpiLookup[year];
+      }
       return entry;
     });
-  }, [records, years, selectedUtilities, metric]);
+  }, [records, years, selectedUtilities, metric, cpiBenchmarkSeries]);
 
   const latestYear = useMemo(() => {
     return [...years].reverse().find((year) =>
@@ -232,6 +290,26 @@ const WaterCorpsChart = () => {
           {payload
             .filter((item) => item.value !== null)
             .map((item) => {
+              if (item.dataKey === CPI_SERIES_NAME) {
+                const benchmark = cpiBenchmarkSeries.find((entry) => entry.year === label);
+                if (!benchmark) return null;
+                return (
+                  <div key={item.dataKey} className="flex items-start justify-between gap-6">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="inline-flex h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: item.color || '#fff' }}
+                      />
+                      <span className="font-medium">CPI benchmark</span>
+                    </div>
+                    <div className="text-right text-xs text-slate-300 space-y-1">
+                      <p className="text-sm font-semibold text-white">{formatRatio(item.value)}</p>
+                      <p>2013-14 avg escalated by CPI</p>
+                    </div>
+                  </div>
+                );
+              }
+
               const record = recordLookup[`${item.dataKey}__${label}`];
               if (!record) return null;
 
@@ -383,6 +461,19 @@ const WaterCorpsChart = () => {
                 />
                 <Tooltip content={renderTooltip} />
                 <Legend wrapperStyle={{ color: '#cbd5f5' }} />
+                {metric === 'ratio' && cpiBenchmarkSeries.length > 0 && (
+                  <Line
+                    type="monotone"
+                    dataKey={CPI_SERIES_NAME}
+                    stroke="#fde68a"
+                    strokeWidth={2.5}
+                    strokeDasharray="6 4"
+                    dot={false}
+                    activeDot={{ r: 4 }}
+                    name="CPI benchmark"
+                    isAnimationActive={false}
+                  />
+                )}
                 {selectedUtilities.map((utility, index) => (
                   <Line
                     key={utility}
@@ -398,6 +489,11 @@ const WaterCorpsChart = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
+          {metric === 'ratio' && (
+            <p className="text-xs text-right text-slate-500">
+              CPI benchmark derived from ABS CPI (weighted average of eight capital cities).
+            </p>
+          )}
         </section>
       </div>
     </div>
