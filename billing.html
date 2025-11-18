@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing - WaterCorp</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <i class="fas fa-bolt-lightning"></i>
+            <h1>WaterCorp</h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="usage.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Energy Usage</span>
+            </a>
+            <a href="billing.html" class="nav-item active">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Billing</span>
+            </a>
+            <a href="reports.html" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <p class="user-name">Admin User</p>
+                    <p class="user-role">System Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>Billing & Invoices</h2>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search invoices...">
+                </div>
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Billing Content -->
+        <div class="dashboard-container">
+            <!-- Billing Summary Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-label">Current Month</p>
+                        <h3 class="stat-value">$3,247</h3>
+                        <p class="stat-change neutral">
+                            <i class="fas fa-calendar"></i> Due Nov 30, 2025
+                        </p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon blue">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-label">Last Month</p>
+                        <h3 class="stat-value">$3,315</h3>
+                        <p class="stat-change positive">
+                            <i class="fas fa-check"></i> Paid on Oct 28
+                        </p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon orange">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-label">Year to Date</p>
+                        <h3 class="stat-value">$38,124</h3>
+                        <p class="stat-change negative">
+                            <i class="fas fa-arrow-up"></i> 4.2% vs last year
+                        </p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon purple">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-info">
+                        <p class="stat-label">Average Monthly</p>
+                        <h3 class="stat-value">$3,284</h3>
+                        <p class="stat-change neutral">
+                            <i class="fas fa-minus"></i> Based on 11 months
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Breakdown Chart -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Monthly Cost Trend</h3>
+                        <button class="export-btn">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="costTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Cost Breakdown by Category</h3>
+                        <select class="time-filter">
+                            <option>Current Month</option>
+                            <option>Last Month</option>
+                            <option>Last Quarter</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="costBreakdownChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice History Table -->
+            <div class="table-card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3>Invoice History</h3>
+                    <div style="display: flex; gap: 12px;">
+                        <select class="time-filter">
+                            <option>All Invoices</option>
+                            <option>Last 6 Months</option>
+                            <option>Last Year</option>
+                            <option>Unpaid Only</option>
+                        </select>
+                        <button class="export-btn">
+                            <i class="fas fa-file-pdf"></i> Download
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Period</th>
+                                <th>Issue Date</th>
+                                <th>Due Date</th>
+                                <th>Amount</th>
+                                <th>Consumption</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>#INV-2025-11</strong></td>
+                                <td>Nov 2025</td>
+                                <td>Nov 1, 2025</td>
+                                <td>Nov 30, 2025</td>
+                                <td><strong>$3,247.00</strong></td>
+                                <td>12,458 kWh</td>
+                                <td><span class="badge warning">Pending</span></td>
+                                <td>
+                                    <button class="action-btn">View</button>
+                                    <button class="action-btn">Pay</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#INV-2025-10</strong></td>
+                                <td>Oct 2025</td>
+                                <td>Oct 1, 2025</td>
+                                <td>Oct 31, 2025</td>
+                                <td><strong>$3,315.00</strong></td>
+                                <td>12,842 kWh</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Paid</span></td>
+                                <td>
+                                    <button class="action-btn">View</button>
+                                    <button class="action-btn">Receipt</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#INV-2025-09</strong></td>
+                                <td>Sep 2025</td>
+                                <td>Sep 1, 2025</td>
+                                <td>Sep 30, 2025</td>
+                                <td><strong>$3,182.00</strong></td>
+                                <td>11,923 kWh</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Paid</span></td>
+                                <td>
+                                    <button class="action-btn">View</button>
+                                    <button class="action-btn">Receipt</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#INV-2025-08</strong></td>
+                                <td>Aug 2025</td>
+                                <td>Aug 1, 2025</td>
+                                <td>Aug 31, 2025</td>
+                                <td><strong>$3,428.00</strong></td>
+                                <td>13,245 kWh</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Paid</span></td>
+                                <td>
+                                    <button class="action-btn">View</button>
+                                    <button class="action-btn">Receipt</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#INV-2025-07</strong></td>
+                                <td>Jul 2025</td>
+                                <td>Jul 1, 2025</td>
+                                <td>Jul 31, 2025</td>
+                                <td><strong>$3,654.00</strong></td>
+                                <td>14,128 kWh</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Paid</span></td>
+                                <td>
+                                    <button class="action-btn">View</button>
+                                    <button class="action-btn">Receipt</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>#INV-2025-06</strong></td>
+                                <td>Jun 2025</td>
+                                <td>Jun 1, 2025</td>
+                                <td>Jun 30, 2025</td>
+                                <td><strong>$3,289.00</strong></td>
+                                <td>12,567 kWh</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Paid</span></td>
+                                <td>
+                                    <button class="action-btn">View</button>
+                                    <button class="action-btn">Receipt</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Rate Information -->
+            <div class="chart-card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3>Current Rate Structure</h3>
+                    <span style="font-size: 12px; color: var(--text-secondary);">Effective Nov 2025</span>
+                </div>
+                <div style="padding: 20px 0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                        <div style="padding: 16px; background-color: var(--background-primary); border-radius: 8px;">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Peak Hours (8AM-8PM)</p>
+                            <p style="font-size: 24px; font-weight: 700; color: var(--text-primary);">$0.28/kWh</p>
+                        </div>
+                        <div style="padding: 16px; background-color: var(--background-primary); border-radius: 8px;">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Off-Peak Hours (8PM-8AM)</p>
+                            <p style="font-size: 24px; font-weight: 700; color: var(--text-primary);">$0.18/kWh</p>
+                        </div>
+                        <div style="padding: 16px; background-color: var(--background-primary); border-radius: 8px;">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Demand Charge</p>
+                            <p style="font-size: 24px; font-weight: 700; color: var(--text-primary);">$15.50/kW</p>
+                        </div>
+                        <div style="padding: 16px; background-color: var(--background-primary); border-radius: 8px;">
+                            <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">Service Charge</p>
+                            <p style="font-size: 24px; font-weight: 700; color: var(--text-primary);">$125.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Cost Trend Chart
+        const costTrendCtx = document.getElementById('costTrendChart');
+        if (costTrendCtx) {
+            new Chart(costTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+                    datasets: [{
+                        label: 'Monthly Cost',
+                        data: [3124, 3056, 3189, 3245, 3312, 3289, 3654, 3428, 3182, 3315, 3247],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            padding: 12,
+                            callbacks: {
+                                label: (context) => '$' + context.parsed.y.toLocaleString()
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            grid: { color: 'rgba(226, 232, 240, 0.5)' },
+                            ticks: {
+                                callback: (value) => '$' + value.toLocaleString()
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Cost Breakdown Chart
+        const costBreakdownCtx = document.getElementById('costBreakdownChart');
+        if (costBreakdownCtx) {
+            new Chart(costBreakdownCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Energy Charges', 'Demand Charges', 'Service Fees', 'Taxes & Surcharges'],
+                    datasets: [{
+                        data: [2240, 685, 125, 197],
+                        backgroundColor: ['#3b82f6', '#f59e0b', '#8b5cf6', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                generateLabels: (chart) => {
+                                    const data = chart.data;
+                                    return data.labels.map((label, i) => ({
+                                        text: label + ' ($' + data.datasets[0].data[i] + ')',
+                                        fillStyle: data.datasets[0].backgroundColor[i],
+                                        hidden: false,
+                                        index: i
+                                    }));
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+    </script>
+</body>
+</html>

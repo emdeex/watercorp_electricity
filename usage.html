@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Usage - WaterCorp</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <i class="fas fa-bolt-lightning"></i>
+            <h1>WaterCorp</h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="usage.html" class="nav-item active">
+                <i class="fas fa-chart-line"></i>
+                <span>Energy Usage</span>
+            </a>
+            <a href="billing.html" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Billing</span>
+            </a>
+            <a href="reports.html" class="nav-item">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <p class="user-name">Admin User</p>
+                    <p class="user-role">System Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>Energy Usage Analysis</h2>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search facilities...">
+                </div>
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Usage Content -->
+        <div class="dashboard-container">
+            <!-- Time Period Selector -->
+            <div class="chart-card" style="margin-bottom: 24px;">
+                <div class="card-header">
+                    <h3>Usage Period</h3>
+                    <div style="display: flex; gap: 12px;">
+                        <select class="time-filter">
+                            <option>Last 7 Days</option>
+                            <option selected>Last 30 Days</option>
+                            <option>Last 90 Days</option>
+                            <option>Last Year</option>
+                            <option>Custom Range</option>
+                        </select>
+                        <button class="export-btn">
+                            <i class="fas fa-download"></i> Export Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Usage Chart -->
+            <div class="chart-card" style="margin-bottom: 24px;">
+                <div class="card-header">
+                    <h3>Hourly Consumption Pattern</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="action-btn">Day</button>
+                        <button class="action-btn" style="background-color: var(--primary-color); color: white;">Week</button>
+                        <button class="action-btn">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="hourlyUsageChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Facility Comparison -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Facility Comparison</h3>
+                        <select class="time-filter">
+                            <option>By Consumption</option>
+                            <option>By Cost</option>
+                            <option>By Efficiency</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="facilityComparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Peak vs Off-Peak Usage</h3>
+                        <span style="font-size: 12px; color: var(--text-secondary);">Current Month</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="peakOffPeakChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Facility Table -->
+            <div class="table-card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3>Detailed Facility Usage</h3>
+                    <div class="search-box" style="margin: 0;">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Filter facilities...">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Facility Name</th>
+                                <th>Type</th>
+                                <th>District</th>
+                                <th>Total kWh</th>
+                                <th>Avg Daily</th>
+                                <th>Peak Demand</th>
+                                <th>Efficiency</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Treatment Plant Alpha</strong></td>
+                                <td><i class="fas fa-industry"></i> Treatment</td>
+                                <td>North District</td>
+                                <td>3,842 kWh</td>
+                                <td>128 kWh</td>
+                                <td>245 kW</td>
+                                <td><span class="badge info">Good</span></td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Online</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pump Station Beta</strong></td>
+                                <td><i class="fas fa-water"></i> Pumping</td>
+                                <td>East District</td>
+                                <td>2,567 kWh</td>
+                                <td>86 kWh</td>
+                                <td>178 kW</td>
+                                <td><span class="badge warning">Fair</span></td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Online</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Main Office Complex</strong></td>
+                                <td><i class="fas fa-building"></i> Administrative</td>
+                                <td>Central District</td>
+                                <td>1,923 kWh</td>
+                                <td>64 kWh</td>
+                                <td>95 kW</td>
+                                <td><span class="badge info">Good</span></td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Online</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Laboratory Gamma</strong></td>
+                                <td><i class="fas fa-flask"></i> Research</td>
+                                <td>West District</td>
+                                <td>1,456 kWh</td>
+                                <td>49 kWh</td>
+                                <td>82 kW</td>
+                                <td><span class="badge info">Good</span></td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Online</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Storage Facility Delta</strong></td>
+                                <td><i class="fas fa-warehouse"></i> Storage</td>
+                                <td>South District</td>
+                                <td>892 kWh</td>
+                                <td>30 kWh</td>
+                                <td>48 kW</td>
+                                <td><span class="badge info">Good</span></td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Online</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pump Station Epsilon</strong></td>
+                                <td><i class="fas fa-water"></i> Pumping</td>
+                                <td>North District</td>
+                                <td>2,234 kWh</td>
+                                <td>74 kWh</td>
+                                <td>156 kW</td>
+                                <td><span class="badge critical">Poor</span></td>
+                                <td><span class="badge warning">Maintenance</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Hourly Usage Chart
+        const hourlyCtx = document.getElementById('hourlyUsageChart');
+        if (hourlyCtx) {
+            new Chart(hourlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['12AM', '2AM', '4AM', '6AM', '8AM', '10AM', '12PM', '2PM', '4PM', '6PM', '8PM', '10PM'],
+                    datasets: [{
+                        label: 'Energy Consumption (kWh)',
+                        data: [450, 380, 420, 580, 920, 1150, 1280, 1420, 1380, 1250, 980, 720],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                            padding: 12,
+                            callbacks: {
+                                label: (context) => context.parsed.y + ' kWh'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(226, 232, 240, 0.5)' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Facility Comparison Chart
+        const facilityCtx = document.getElementById('facilityComparisonChart');
+        if (facilityCtx) {
+            new Chart(facilityCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Treatment\nAlpha', 'Pump\nBeta', 'Office\nComplex', 'Lab\nGamma', 'Storage\nDelta'],
+                    datasets: [{
+                        label: 'Consumption (kWh)',
+                        data: [3842, 2567, 1923, 1456, 892],
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'],
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(226, 232, 240, 0.5)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Peak vs Off-Peak Chart
+        const peakCtx = document.getElementById('peakOffPeakChart');
+        if (peakCtx) {
+            new Chart(peakCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Peak Hours', 'Off-Peak Hours', 'Mid-Peak Hours'],
+                    datasets: [{
+                        data: [45, 35, 20],
+                        backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

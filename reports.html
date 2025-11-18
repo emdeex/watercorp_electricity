@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - WaterCorp</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <i class="fas fa-bolt-lightning"></i>
+            <h1>WaterCorp</h1>
+        </div>
+        <nav class="nav-menu">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-dashboard"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="usage.html" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Energy Usage</span>
+            </a>
+            <a href="billing.html" class="nav-item">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <span>Billing</span>
+            </a>
+            <a href="reports.html" class="nav-item active">
+                <i class="fas fa-chart-bar"></i>
+                <span>Reports</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <p class="user-name">Admin User</p>
+                    <p class="user-role">System Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Header -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2>Reports & Analytics</h2>
+            </div>
+            <div class="header-right">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search reports...">
+                </div>
+                <button class="notification-btn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Reports Content -->
+        <div class="dashboard-container">
+            <!-- Report Generation -->
+            <div class="chart-card" style="margin-bottom: 24px;">
+                <div class="card-header">
+                    <h3>Generate Custom Report</h3>
+                </div>
+                <div style="padding: 20px 0;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">Report Type</label>
+                            <select class="time-filter" style="width: 100%;">
+                                <option>Energy Consumption Summary</option>
+                                <option>Cost Analysis Report</option>
+                                <option>Facility Performance Report</option>
+                                <option>Environmental Impact Report</option>
+                                <option>Compliance Report</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">Time Period</label>
+                            <select class="time-filter" style="width: 100%;">
+                                <option>Last Month</option>
+                                <option>Last Quarter</option>
+                                <option>Last 6 Months</option>
+                                <option>Last Year</option>
+                                <option>Custom Range</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">Format</label>
+                            <select class="time-filter" style="width: 100%;">
+                                <option>PDF Document</option>
+                                <option>Excel Spreadsheet</option>
+                                <option>CSV Data</option>
+                                <option>JSON Data</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button class="export-btn" style="width: 100%;">
+                                <i class="fas fa-file-export"></i> Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Reports Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 32px;">
+                <div class="chart-card" style="cursor: pointer; transition: var(--transition);">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-chart-line" style="font-size: 36px; color: white;"></i>
+                        </div>
+                        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Monthly Summary</h3>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Complete overview of monthly energy consumption and costs</p>
+                        <button class="action-btn" style="background-color: var(--primary-color); color: white; border: none;">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chart-card" style="cursor: pointer; transition: var(--transition);">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-building" style="font-size: 36px; color: white;"></i>
+                        </div>
+                        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Facility Performance</h3>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Detailed performance metrics for all facilities</p>
+                        <button class="action-btn" style="background-color: var(--secondary-color); color: white; border: none;">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chart-card" style="cursor: pointer; transition: var(--transition);">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-leaf" style="font-size: 36px; color: white;"></i>
+                        </div>
+                        <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">Sustainability Report</h3>
+                        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Environmental impact and carbon footprint analysis</p>
+                        <button class="action-btn" style="background-color: #f59e0b; color: white; border: none;">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparative Analysis -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Year-over-Year Comparison</h3>
+                        <select class="time-filter">
+                            <option>2025 vs 2024</option>
+                            <option>2024 vs 2023</option>
+                            <option>2023 vs 2022</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="yearComparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h3>Efficiency Metrics</h3>
+                        <span style="font-size: 12px; color: var(--text-secondary);">Last 6 Months</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="efficiencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scheduled Reports -->
+            <div class="table-card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3>Scheduled Reports</h3>
+                    <button class="export-btn">
+                        <i class="fas fa-plus"></i> New Schedule
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Report Name</th>
+                                <th>Frequency</th>
+                                <th>Recipients</th>
+                                <th>Last Sent</th>
+                                <th>Next Scheduled</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Monthly Summary Report</strong></td>
+                                <td>Monthly</td>
+                                <td>3 recipients</td>
+                                <td>Nov 1, 2025</td>
+                                <td>Dec 1, 2025</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Active</span></td>
+                                <td>
+                                    <button class="action-btn">Edit</button>
+                                    <button class="action-btn">Pause</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Weekly Usage Report</strong></td>
+                                <td>Weekly</td>
+                                <td>5 recipients</td>
+                                <td>Nov 15, 2025</td>
+                                <td>Nov 22, 2025</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Active</span></td>
+                                <td>
+                                    <button class="action-btn">Edit</button>
+                                    <button class="action-btn">Pause</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Quarterly Sustainability Report</strong></td>
+                                <td>Quarterly</td>
+                                <td>8 recipients</td>
+                                <td>Oct 1, 2025</td>
+                                <td>Jan 1, 2026</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Active</span></td>
+                                <td>
+                                    <button class="action-btn">Edit</button>
+                                    <button class="action-btn">Pause</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Annual Compliance Report</strong></td>
+                                <td>Annually</td>
+                                <td>12 recipients</td>
+                                <td>Jan 1, 2025</td>
+                                <td>Jan 1, 2026</td>
+                                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">Active</span></td>
+                                <td>
+                                    <button class="action-btn">Edit</button>
+                                    <button class="action-btn">Pause</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Downloads -->
+            <div class="table-card" style="margin-top: 24px;">
+                <div class="card-header">
+                    <h3>Recent Downloads</h3>
+                    <a href="#" class="view-all">View All</a>
+                </div>
+                <div class="facility-list">
+                    <div class="facility-item">
+                        <div class="facility-info">
+                            <i class="fas fa-file-pdf" style="color: #ef4444;"></i>
+                            <div>
+                                <p class="facility-name">October 2025 Monthly Summary</p>
+                                <p class="facility-location">Downloaded 2 hours ago</p>
+                            </div>
+                        </div>
+                        <button class="action-btn">Download Again</button>
+                    </div>
+                    <div class="facility-item">
+                        <div class="facility-info">
+                            <i class="fas fa-file-excel" style="color: #10b981;"></i>
+                            <div>
+                                <p class="facility-name">Q3 2025 Energy Usage Data</p>
+                                <p class="facility-location">Downloaded 1 day ago</p>
+                            </div>
+                        </div>
+                        <button class="action-btn">Download Again</button>
+                    </div>
+                    <div class="facility-item">
+                        <div class="facility-info">
+                            <i class="fas fa-file-pdf" style="color: #ef4444;"></i>
+                            <div>
+                                <p class="facility-name">Facility Performance Report - Sept 2025</p>
+                                <p class="facility-location">Downloaded 3 days ago</p>
+                            </div>
+                        </div>
+                        <button class="action-btn">Download Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Year Comparison Chart
+        const yearCompCtx = document.getElementById('yearComparisonChart');
+        if (yearCompCtx) {
+            new Chart(yearCompCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+                    datasets: [
+                        {
+                            label: '2025',
+                            data: [12458, 11823, 12356, 12589, 12845, 12567, 14128, 13245, 11923, 12842, 12458],
+                            backgroundColor: '#3b82f6',
+                            borderRadius: 4,
+                        },
+                        {
+                            label: '2024',
+                            data: [11954, 11234, 11789, 12123, 12456, 12234, 13678, 12956, 11456, 12234, 11845],
+                            backgroundColor: '#94a3b8',
+                            borderRadius: 4,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'end'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(226, 232, 240, 0.5)' },
+                            ticks: {
+                                callback: (value) => value.toLocaleString() + ' kWh'
+                            }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Efficiency Chart
+        const efficiencyCtx = document.getElementById('efficiencyChart');
+        if (efficiencyCtx) {
+            new Chart(efficiencyCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Energy Efficiency', 'Cost Optimization', 'Peak Management', 'Sustainability', 'Reliability', 'Compliance'],
+                    datasets: [{
+                        label: 'Current Performance',
+                        data: [85, 78, 82, 90, 88, 95],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
