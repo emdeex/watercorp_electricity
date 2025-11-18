@@ -348,7 +348,7 @@ const WaterCorpsChart = () => {
         <header className="space-y-3 text-center lg:text-left">
           <p className="text-sm uppercase tracking-[0.4em] text-slate-400">Victorian Water Corporations</p>
           <h1 className="text-3xl sm:text-4xl font-semibold text-white">
-            Electricity intensity, spending, and carbon-surrogate trends
+            Electricity Cost, Usage and $ per kWh
           </h1>
           <p className="text-base text-slate-300 max-w-3xl mx-auto lg:mx-0">
             Explore twelve years of electricity consumption (kWh), energy spend, and cost-per-kWh ratios for 18 water utilities.
