@@ -68,7 +68,7 @@ const formatGigawattHours = (value) => {
 };
 
 const WaterCorpsChart = () => {
-  const rawData = [
+  const fallbackData = [
     { year: "2013-14", "Barwon Water": 0.157579735, "Central Highlands Water": 0.203421229, "City West Water": 0.066243291, "Coliban": null, "East Gippsland Water": 0.2, "Goulburn Murray Water": 0.237094131, "Goulburn Valley Water": 0.209001867, "Greater Western Water": null, "GWMWater": null, "Lower Murray Water": null, "Melbourne Water": null, "NE Water": null, "South East Water": 0.149948642, "South Gippsland Water": 0.23676943, "Wannon Water": 0.155575582, "Western Water": 0.182951924, "Westernport Water": 0.197112013, "Yarra Valley Water": 0.137328733 },
     { year: "2014-15", "Barwon Water": 0.172349921, "Central Highlands Water": 0.197632088, "City West Water": 0.214095842, "Coliban": null, "East Gippsland Water": 0.174285714, "Goulburn Murray Water": 0.225148923, "Goulburn Valley Water": 0.20488802, "Greater Western Water": null, "GWMWater": null, "Lower Murray Water": null, "Melbourne Water": null, "NE Water": null, "South East Water": 0.141943405, "South Gippsland Water": 0.204459934, "Wannon Water": 0.166179361, "Western Water": 0.22163299, "Westernport Water": 0.178553248, "Yarra Valley Water": 0.120217712 },
     { year: "2015-16", "Barwon Water": 0.161987966, "Central Highlands Water": 0.146653895, "City West Water": 0.178157885, "Coliban": null, "East Gippsland Water": 0.179316239, "Goulburn Murray Water": 0.22577605, "Goulburn Valley Water": 0.184667452, "Greater Western Water": null, "GWMWater": null, "Lower Murray Water": null, "Melbourne Water": null, "NE Water": 0.16945, "South East Water": 0.136942179, "South Gippsland Water": 0.188557495, "Wannon Water": 0.169086802, "Western Water": 0.19044067, "Westernport Water": 0.170911999, "Yarra Valley Water": 0.128155026 },
@@ -102,7 +102,37 @@ const WaterCorpsChart = () => {
   const [showForecast, setShowForecast] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  const energyRecords = useMemo(() => parseEnergyRecords(csvRaw), []);
+  const energyRecords = useMemo(() => parseEnergyRecords(csvRaw), [csvRaw]);
+  const recordLookup = useMemo(() => {
+    if (!energyRecords.length) return {};
+    const map = {};
+    energyRecords.forEach((record) => {
+      if (!record.utility || !record.year) return;
+      map[`${record.utility}__${record.year}`] = record;
+    });
+    return map;
+  }, [energyRecords, corporations]);
+
+  const ratioSeries = useMemo(() => {
+    if (!energyRecords.length) return [];
+    const yearMap = new Map();
+    energyRecords.forEach((record) => {
+      if (!record.year || !record.utility) return;
+      if (!yearMap.has(record.year)) {
+        const entry = { year: record.year };
+        corporations.forEach((corp) => {
+          entry[corp] = null;
+        });
+        yearMap.set(record.year, entry);
+      }
+      if (corporations.includes(record.utility) && record.ratio !== null) {
+        yearMap.get(record.year)[record.utility] = record.ratio;
+      }
+    });
+    return Array.from(yearMap.values()).sort((a, b) => yearSortValue(a.year) - yearSortValue(b.year));
+  }, [energyRecords]);
+
+  const rawData = ratioSeries.length ? ratioSeries : fallbackData;
   const energyYears = useMemo(() => {
     const uniqueYears = new Set();
     energyRecords.forEach((record) => {
@@ -168,6 +198,7 @@ const WaterCorpsChart = () => {
     : 'bg-white/95 backdrop-blur-sm p-4 border border-gray-200 rounded-xl shadow-2xl';
   const tooltipTitleClass = isDarkMode ? 'text-slate-100' : 'text-gray-900';
   const tooltipMutedClass = isDarkMode ? 'text-slate-300' : 'text-gray-700';
+  const tooltipDetailClass = isDarkMode ? 'text-slate-400' : 'text-gray-500';
 
   const themeToggleClass = isDarkMode
     ? 'bg-slate-800 text-slate-100 border border-slate-600 hover:bg-slate-700'
@@ -241,20 +272,31 @@ const WaterCorpsChart = () => {
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {payload
               .sort((a, b) => b.value - a.value)
-              .map((entry, index) => (
-                <div key={index} className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: entry.color }}
-                    />
-                    <span className={`text-sm font-medium ${tooltipMutedClass}`}>{entry.name}</span>
+              .map((entry, index) => {
+                const record = recordLookup[`${entry.name}__${label}`];
+                return (
+                  <div key={index} className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: entry.color }}
+                      />
+                      <span className={`text-sm font-medium ${tooltipMutedClass}`}>{entry.name}</span>
+                    </div>
+                    <div className="text-right space-y-1">
+                      <span className="block text-sm font-bold" style={{ color: entry.color }}>
+                        {entry.value !== null && entry.value !== undefined ? `$${entry.value.toFixed(4)}` : 'N/A'}
+                      </span>
+                      {record && (
+                        <div className={`text-xs ${tooltipDetailClass}`}>
+                          <p>Spend: {record.spend ? formatMillionsAUD(record.spend) : 'N/A'}</p>
+                          <p>Usage: {record.kWh ? formatGigawattHours(record.kWh) : 'N/A'}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-sm font-bold" style={{ color: entry.color }}>
-                    {entry.value !== null && entry.value !== undefined ? `$${entry.value.toFixed(4)}` : 'N/A'}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
           </div>
         </div>
       );
