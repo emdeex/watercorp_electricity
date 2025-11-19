@@ -1,5 +1,71 @@
 import React, { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import csvRaw from './data/watercorps.csv?raw';
+
+const parseNumber = (value) => {
+  if (value === undefined || value === null || value === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const parseEnergyRecords = (raw) => {
+  if (!raw) return [];
+  const [headerLine, ...lines] = raw.trim().split(/\r?\n/);
+  const headers = headerLine.split(',');
+
+  return lines
+    .map((line) => {
+      if (!line.trim()) return null;
+      const cells = line.split(',');
+      const record = {};
+      headers.forEach((header, index) => {
+        record[header] = cells[index] ?? '';
+      });
+
+      const utility = (record.Utility_Name || '').trim();
+      if (!utility || utility.toUpperCase() === 'TOTAL') return null;
+
+      return {
+        utility,
+        year: record.Year,
+        kWh: parseNumber(record.kWh),
+        spend: parseNumber(record.Value),
+        ratio: parseNumber(record.Ratio),
+      };
+    })
+    .filter(Boolean);
+};
+
+const yearSortValue = (label) => {
+  if (!label) return 0;
+  const [start] = label.split('-');
+  const numeric = parseInt(start, 10);
+  return Number.isNaN(numeric) ? 0 : numeric;
+};
+
+const formatYearRange = (years) => {
+  if (!years.length) return 'N/A';
+  if (years.length === 1) return years[0];
+  return `${years[0]} - ${years[years.length - 1]}`;
+};
+
+const formatMillionsAUD = (value) => {
+  if (value === null || value === undefined) return 'N/A';
+  const billions = value / 1_000_000_000;
+  if (billions >= 1) {
+    return `A$${billions.toFixed(2)}B`;
+  }
+  return `A$${(value / 1_000_000).toFixed(1)}M`;
+};
+
+const formatGigawattHours = (value) => {
+  if (value === null || value === undefined) return 'N/A';
+  const terawattHours = value / 1_000_000_000;
+  if (terawattHours >= 1) {
+    return `${terawattHours.toFixed(2)} TWh`;
+  }
+  return `${(value / 1_000_000).toFixed(1)} GWh`;
+};
 
 const WaterCorpsChart = () => {
   const rawData = [
@@ -34,6 +100,85 @@ const WaterCorpsChart = () => {
   const [selectedCorps, setSelectedCorps] = useState(corporations.slice(0, 5));
   const [hoveredCorp, setHoveredCorp] = useState(null);
   const [showForecast, setShowForecast] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const energyRecords = useMemo(() => parseEnergyRecords(csvRaw), []);
+  const energyYears = useMemo(() => {
+    const uniqueYears = new Set();
+    energyRecords.forEach((record) => {
+      if (record.year) uniqueYears.add(record.year);
+    });
+    return Array.from(uniqueYears).sort((a, b) => yearSortValue(a) - yearSortValue(b));
+  }, [energyRecords]);
+
+  const energyTotals = useMemo(() => {
+    if (!energyRecords.length) {
+      return { totalSpend: null, totalKWh: null };
+    }
+
+    return energyRecords.reduce(
+      (acc, record) => {
+        acc.totalSpend += record.spend || 0;
+        acc.totalKWh += record.kWh || 0;
+        return acc;
+      },
+      { totalSpend: 0, totalKWh: 0 }
+    );
+  }, [energyRecords]);
+
+  const energyRangeLabel = useMemo(() => formatYearRange(energyYears), [energyYears]);
+
+  const chartYears = rawData.map((entry) => entry.year).filter(Boolean);
+  const chartRangeLabel = chartYears.length ? `${chartYears[0]} - ${chartYears[chartYears.length - 1]}` : '';
+
+  const pageBackgroundClass = isDarkMode
+    ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100'
+    : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 text-gray-900';
+
+  const glassPanelClass = isDarkMode
+    ? 'bg-slate-900/80 border border-slate-800'
+    : 'bg-white/80 border border-gray-100';
+
+  const infoCardBackground = isDarkMode ? 'bg-slate-800/60 border border-slate-700' : 'bg-white/60 border border-gray-200';
+  const gradientFooterClass = isDarkMode
+    ? 'bg-gradient-to-r from-slate-950 to-slate-900 border border-slate-800'
+    : 'bg-gradient-to-r from-blue-50 to-indigo-50 border border-gray-200';
+  const chartSectionBg = isDarkMode ? 'bg-slate-950/40' : 'bg-white';
+
+  const mutedTextClass = isDarkMode ? 'text-slate-300' : 'text-gray-600';
+  const captionTextClass = isDarkMode ? 'text-slate-400' : 'text-gray-500';
+  const controlsBackgroundClass = isDarkMode
+    ? 'bg-gradient-to-r from-slate-900 to-slate-900 border-b border-slate-800'
+    : 'bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200';
+
+  const clearButtonClass = isDarkMode
+    ? 'bg-slate-900/60 text-slate-200 border-2 border-slate-700 hover:bg-slate-800 hover:border-slate-500'
+    : 'bg-white text-gray-700 border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400';
+
+  const forecastOffClass = isDarkMode
+    ? 'bg-slate-900/60 text-slate-200 border-2 border-slate-700 hover:border-orange-400 hover:text-orange-300'
+    : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-orange-400 hover:text-orange-600';
+
+  const chipBaseClass = isDarkMode
+    ? 'bg-slate-900/60 hover:bg-slate-900 border-slate-700 hover:border-slate-500 hover:shadow-sm'
+    : 'bg-white/70 hover:bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm';
+
+  const tooltipContainerClass = isDarkMode
+    ? 'bg-slate-900/95 backdrop-blur-sm p-4 border border-slate-700 rounded-xl shadow-2xl'
+    : 'bg-white/95 backdrop-blur-sm p-4 border border-gray-200 rounded-xl shadow-2xl';
+  const tooltipTitleClass = isDarkMode ? 'text-slate-100' : 'text-gray-900';
+  const tooltipMutedClass = isDarkMode ? 'text-slate-300' : 'text-gray-700';
+
+  const themeToggleClass = isDarkMode
+    ? 'bg-slate-800 text-slate-100 border border-slate-600 hover:bg-slate-700'
+    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50';
+
+  const axisTickColor = isDarkMode ? '#e5e7eb' : '#4b5563';
+  const axisLineColor = isDarkMode ? '#475569' : '#d1d5db';
+  const axisLabelColor = isDarkMode ? '#e5e7eb' : '#374151';
+  const cursorColor = isDarkMode ? '#fca5a5' : '#6366f1';
+  const gridGradientStart = isDarkMode ? '#475569' : '#e5e7eb';
+  const gridGradientEnd = isDarkMode ? 'rgba(71, 85, 105, 0.2)' : '#e5e7eb';
 
   // Calculate simple linear forecast for next year
   const calculateForecast = (corp) => {
@@ -78,12 +223,20 @@ const WaterCorpsChart = () => {
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
-      const isForecast = label.includes('forecast');
+      const isForecast = label?.includes('forecast');
       return (
-        <div className="bg-white/95 backdrop-blur-sm p-4 border border-gray-200 rounded-xl shadow-2xl">
-          <p className="font-bold text-gray-900 mb-3 text-base border-b border-gray-200 pb-2">
+        <div className={tooltipContainerClass}>
+          <p className={`font-bold ${tooltipTitleClass} mb-3 text-base border-b ${isDarkMode ? 'border-slate-700' : 'border-gray-200'} pb-2`}>
             {label}
-            {isForecast && <span className="text-xs ml-2 bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Projected</span>}
+            {isForecast && (
+              <span
+                className={`text-xs ml-2 px-2 py-0.5 rounded-full ${
+                  isDarkMode ? 'bg-orange-900/30 text-orange-200' : 'bg-orange-100 text-orange-700'
+                }`}
+              >
+                Projected
+              </span>
+            )}
           </p>
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {payload
@@ -95,10 +248,10 @@ const WaterCorpsChart = () => {
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: entry.color }}
                     />
-                    <span className="text-sm font-medium text-gray-700">{entry.name}</span>
+                    <span className={`text-sm font-medium ${tooltipMutedClass}`}>{entry.name}</span>
                   </div>
                   <span className="text-sm font-bold" style={{ color: entry.color }}>
-                    {entry.value ? `$${entry.value.toFixed(4)}` : 'N/A'}
+                    {entry.value !== null && entry.value !== undefined ? `$${entry.value.toFixed(4)}` : 'N/A'}
                   </span>
                 </div>
               ))}
@@ -110,39 +263,81 @@ const WaterCorpsChart = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className={`min-h-screen ${pageBackgroundClass} p-4 md:p-8 transition-colors duration-300`}>
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8 mb-6 border border-gray-100">
-          <div className="flex items-start justify-between mb-4">
+        <div className={`${glassPanelClass} backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8`}>
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
                 Victoria Water Corporations
               </h1>
-              <p className="text-gray-600 text-lg">Electricity Cost Analysis ($/kWh)</p>
+              <p className={`${mutedTextClass} text-lg`}>Electricity Cost Analysis ($/kWh)</p>
             </div>
-            <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-xl shadow-lg">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-              <span className="font-semibold">2013-2025</span>
+            <div className="flex flex-col gap-3 items-stretch md:items-end">
+              <div className="hidden md:flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-xl shadow-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                <span className="font-semibold">{chartRangeLabel || '2013-2025'}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDarkMode((prev) => !prev)}
+                className={`${themeToggleClass} flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold shadow-md transition-colors`}
+                aria-pressed={isDarkMode}
+              >
+                {isDarkMode ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m0-11.314L7.05 7.05m11.314 11.314-1.414-1.414" />
+                    </svg>
+                    Light Mode
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                    Dark Mode
+                  </>
+                )}
+              </button>
             </div>
           </div>
-          <p className="text-sm text-gray-500">
-            Tracking electricity costs across 18 Victorian water corporations over 12 years
+          <p className={`text-sm ${captionTextClass}`}>
+            Tracking electricity spend, consumption, and cost efficiency across 18 Victorian water corporations.
           </p>
         </div>
 
+        {/* Energy Totals */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className={`${infoCardBackground} rounded-2xl p-5 shadow-lg`}>
+            <p className={`text-xs uppercase tracking-wide ${captionTextClass}`}>Portfolio energy spend</p>
+            <p className="mt-3 text-3xl font-semibold">
+              {formatMillionsAUD(energyTotals.totalSpend)}
+            </p>
+            <p className={`${mutedTextClass} text-xs mt-1`}>Nominal AUD across {energyRangeLabel}</p>
+          </div>
+          <div className={`${infoCardBackground} rounded-2xl p-5 shadow-lg`}>
+            <p className={`text-xs uppercase tracking-wide ${captionTextClass}`}>Electricity consumed</p>
+            <p className="mt-3 text-3xl font-semibold">
+              {formatGigawattHours(energyTotals.totalKWh)}
+            </p>
+            <p className={`${mutedTextClass} text-xs mt-1`}>All utilities, {energyRangeLabel}</p>
+          </div>
+        </div>
+
         {/* Main Chart Card */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div className={`${glassPanelClass} backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden`}>
           {/* Controls Section */}
-          <div className="p-6 bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
+          <div className={`p-6 ${controlsBackgroundClass}`}>
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
               <div className="flex items-center gap-3">
-                <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide">
+                <h2 className={`text-sm font-bold uppercase tracking-wide ${isDarkMode ? 'text-slate-100' : 'text-gray-700'}`}>
                   Filter Corporations
                 </h2>
-                <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full">
+                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${isDarkMode ? 'bg-slate-800 text-slate-100' : 'bg-blue-100 text-blue-700'}`}>
                   {selectedCorps.length} selected
                 </span>
               </div>
@@ -152,7 +347,7 @@ const WaterCorpsChart = () => {
                   className={`group relative px-5 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${
                     showForecast
                       ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/50 scale-105'
-                      : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-orange-400 hover:text-orange-600'
+                      : forecastOffClass
                   }`}
                 >
                   <span className="flex items-center gap-2">
@@ -181,7 +376,7 @@ const WaterCorpsChart = () => {
                 </button>
                 <button
                   onClick={() => setSelectedCorps([])}
-                  className="px-4 py-2.5 text-sm font-semibold bg-white text-gray-700 border-2 border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-300"
+                  className={`px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-300 ${clearButtonClass}`}
                 >
                   Clear
                 </button>
@@ -199,7 +394,7 @@ const WaterCorpsChart = () => {
                   className={`group relative px-3 py-2 text-xs font-medium rounded-lg border-2 transition-all duration-200 ${
                     selectedCorps.includes(corp)
                       ? 'shadow-md transform hover:scale-105'
-                      : 'bg-white/70 hover:bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                      : chipBaseClass
                   } ${hoveredCorp === corp ? 'ring-4 ring-blue-200 ring-opacity-50 transform scale-105 z-10' : ''}`}
                   style={{
                     backgroundColor: selectedCorps.includes(corp) ? colors[index] : undefined,
@@ -222,40 +417,40 @@ const WaterCorpsChart = () => {
           </div>
 
           {/* Chart Section */}
-          <div className="p-6 bg-white">
+          <div className={`p-6 ${chartSectionBg}`}>
             <ResponsiveContainer width="100%" height={550}>
               <LineChart data={dataWithForecast} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <defs>
                   <linearGradient id="gridGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#e5e7eb" stopOpacity="0.8"/>
-                    <stop offset="100%" stopColor="#e5e7eb" stopOpacity="0.2"/>
+                    <stop offset="0%" stopColor={gridGradientStart} stopOpacity="0.8"/>
+                    <stop offset="100%" stopColor={gridGradientEnd} stopOpacity="0.2"/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="url(#gridGradient)" />
                 <XAxis
                   dataKey="year"
-                  tick={{ fill: '#4b5563', fontSize: 11, fontWeight: 500 }}
-                  tickLine={{ stroke: '#9ca3af' }}
+                  tick={{ fill: axisTickColor, fontSize: 11, fontWeight: 500 }}
+                  tickLine={{ stroke: axisLineColor }}
                   angle={-45}
                   textAnchor="end"
                   height={90}
-                  stroke="#d1d5db"
+                  stroke={axisLineColor}
                 />
                 <YAxis
-                  tick={{ fill: '#4b5563', fontSize: 12, fontWeight: 500 }}
-                  tickLine={{ stroke: '#9ca3af' }}
+                  tick={{ fill: axisTickColor, fontSize: 12, fontWeight: 500 }}
+                  tickLine={{ stroke: axisLineColor }}
                   tickFormatter={(value) => `$${value.toFixed(2)}`}
                   label={{
                     value: 'Cost ($/kWh)',
                     angle: -90,
                     position: 'insideLeft',
-                    style: { fill: '#374151', fontWeight: 'bold', fontSize: 14 }
+                    style: { fill: axisLabelColor, fontWeight: 'bold', fontSize: 14 }
                   }}
-                  stroke="#d1d5db"
+                  stroke={axisLineColor}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: cursorColor, strokeWidth: 2, strokeDasharray: '5 5' }} />
                 <Legend
-                  wrapperStyle={{ paddingTop: '30px' }}
+                  wrapperStyle={{ paddingTop: '30px', color: isDarkMode ? '#e2e8f0' : '#111827' }}
                   iconType="line"
                 />
                 {selectedCorps.map((corp, index) => (
@@ -290,30 +485,30 @@ const WaterCorpsChart = () => {
           </div>
 
           {/* Info Footer */}
-          <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-t border-gray-200">
+          <div className={`p-6 ${gradientFooterClass} border-t`}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="flex items-start gap-3 bg-white/60 p-4 rounded-xl">
+              <div className={`flex items-start gap-3 ${infoCardBackground} p-4 rounded-xl`}>
                 <div className="bg-blue-500 text-white p-2 rounded-lg">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 mb-1">How to Use</p>
-                  <p className="text-gray-600 text-xs leading-relaxed">
+                  <p className={`font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>How to Use</p>
+                  <p className={`${mutedTextClass} text-xs leading-relaxed`}>
                     Click corporation chips to toggle visibility. Hover over chips to highlight specific trend lines on the chart. Enable forecast mode to view projected 2025-26 values.
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 bg-white/60 p-4 rounded-xl">
+              <div className={`flex items-start gap-3 ${infoCardBackground} p-4 rounded-xl`}>
                 <div className="bg-orange-500 text-white p-2 rounded-lg">
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="font-semibold text-gray-900 mb-1">Forecast Methodology</p>
-                  <p className="text-gray-600 text-xs leading-relaxed">
+                  <p className={`font-semibold mb-1 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Forecast Methodology</p>
+                  <p className={`${mutedTextClass} text-xs leading-relaxed`}>
                     Linear regression analysis on historical data (minimum 3 points). Projections shown as dashed lines with orange markers.
                   </p>
                 </div>
